@@ -1,6 +1,4 @@
-os.execute("chcp 65001 > nul")
-
-local utf8 = require("utf8")
+os.setlocale("ru_RU.UTF-8", "ctype")
 
 function countCharPercentage(text, char)
     if text == nil or text == "" then
@@ -34,5 +32,5 @@ function countCharPercentage(text, char)
 end
 
 local text = "Russian text - русский текст"
-local char = "с"
+local char = "у"
 countCharPercentage(text, char)
