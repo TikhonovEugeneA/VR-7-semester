@@ -1,10 +1,9 @@
 local marker = reactorController:getReactorByName("Marker")
 local text = reactorController:getReactorByName("TextInfo")
 local model = reactorController:getReactorByName("RatModel")
-
-resource = resourceRepository:getResourceByName("Rat.FBX")
-model.model = resource
 model:show()
+
+local FRAME_DT = 1.0 / 60.0
 
 --#region params
 
@@ -31,8 +30,8 @@ local axes = {
 
 local function updateInfo()
     local axisName = rotationAxis and rotationAxis.name or "-"
-    text.text = string.format("Axis: %s | Rotations: %d | Speed: %.1f",
-        axisName, totalRotations, currentSpeed)
+    text:setText_value(string.format("Axis: %s | Rotations: %d | Speed: %.1f",
+    axisName, totalRotations, currentSpeed))
 end
 
 local function startRotation()
@@ -50,10 +49,10 @@ local function finishRotation()
     updateInfo()
 end
 
-local function updateRotation(dt)
+local function updateRotation()
     if not isRotating then return end
 
-    currentAngle = currentAngle + currentSpeed * dt
+    currentAngle = currentAngle + currentSpeed * FRAME_DT
 
     if currentAngle >= 2 * math.pi then
         currentAngle = 2 * math.pi
@@ -88,8 +87,8 @@ model:subscribeEvent("onDoubleClick", function()
     updateInfo()
 end)
 
-marker:subscribeEvent("onFrame", function(dt)
-    updateRotation(dt)
+marker:subscribeEvent("onFrame", function()
+    updateRotation()
 end)
 
 --#endregion
@@ -98,18 +97,16 @@ end)
 
 local eventsHandler = osgGA.GUIEventHandler(function(ea, aa)
     if ea:getEventType() == osgGA.GUIEventAdapter.KEYDOWN then
-        local key = ea:getKey()
 
-        if key == bit_or(osgGA.GUIEventAdapter.KEY_Plus)
-            or key == bit_or(osgGA.GUIEventAdapter.KEY_Equal)
-            or key == bit_or(osgGA.GUIEventAdapter.KEY_KP_Add) then
+        -- Стрелка вниз — увеличить скорость
+        if ea:getKey() == bit_or(osgGA.GUIEventAdapter.KEY_Down) then
             currentSpeed = currentSpeed + stepSpeed
             updateInfo()
             return true
         end
 
-        if key == bit_or(osgGA.GUIEventAdapter.KEY_Minus)
-            or key == bit_or(osgGA.GUIEventAdapter.KEY_KP_Subtract) then
+        -- Стрелка вверх — уменьшить скорость
+        if ea:getKey() == bit_or(osgGA.GUIEventAdapter.KEY_Up) then
             if currentSpeed > stepSpeed then
                 currentSpeed = currentSpeed - stepSpeed
             end
